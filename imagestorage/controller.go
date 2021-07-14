@@ -1,9 +1,11 @@
 package imagestorage
 
 import (
+	"encoding/json"
 	"fmt"
 	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +16,20 @@ func writeHttpError(w http.ResponseWriter, status int, msg *string) {
 	} else {
 		fmt.Fprintf(w, "%d - %s!", status, *msg)
 	}
+}
+
+func writeHttpErrorNoMsg(w http.ResponseWriter, status int) {
+	writeHttpError(w, status, nil)
+}
+
+func writeHttpErrorWithMsg(w http.ResponseWriter, status int, msg string) {
+	writeHttpError(w, status, &msg)
+}
+
+func writeJsonResponse(w http.ResponseWriter, status int, response interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response)
 }
 
 // https://gist.github.com/rjz/fe283b02cbaa50c5991e1ba921adf7c9
@@ -39,10 +55,9 @@ type PostImageController struct {
 	service *ImageStorageService
 }
 
-func (h *PostImageController) Serve(w http.ResponseWriter, r *http.Request) {
+func (c *PostImageController) Serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		msg := "not a " + http.MethodPost + " request"
-		writeHttpError(w, http.StatusMethodNotAllowed, &msg)
+		writeHttpErrorWithMsg(w, http.StatusMethodNotAllowed, "not a "+http.MethodPost+" request")
 		return
 	}
 
@@ -58,39 +73,63 @@ func (h *PostImageController) Serve(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if mimeType == mimeTypeNone {
-		msg := "allowed mime types are: " + strings.Join(allowedMimeTypes, ", ")
-		writeHttpError(w, http.StatusUnsupportedMediaType, &msg)
+		writeHttpErrorWithMsg(w, http.StatusUnsupportedMediaType, "allowed mime types are: "+strings.Join(allowedMimeTypes, ", "))
 		return
 	}
 
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	if r.Body == nil {
+		writeHttpErrorWithMsg(w, http.StatusBadRequest, "body must not be empty")
+		return
+	}
+
+	id := c.service.PutImage(r.Body, "abc", mimeType)
+	status := http.StatusOK
+	if status < 0 {
+		status = http.StatusInternalServerError
+	}
+	writeJsonResponse(w, status, ResponseImageUpload{Id: id})
 }
 
 type GetImageController struct {
 	service *ImageStorageService
 }
 
-func (h *GetImageController) Serve(w http.ResponseWriter, r *http.Request) {
+func (c *GetImageController) Serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		msg := "not a " + http.MethodGet + " request"
-		writeHttpError(w, http.StatusMethodNotAllowed, &msg)
+		writeHttpErrorWithMsg(w, http.StatusMethodNotAllowed, "not a "+http.MethodGet+" request")
 		return
 	}
 
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	urlParts := strings.Split(r.URL.Path, "/")
+	if len(urlParts) == 0 {
+		writeHttpErrorNoMsg(w, http.StatusNotFound)
+	}
 
+	id, err := strconv.Atoi(urlParts[len(urlParts)-1])
+	if err != nil {
+		writeHttpErrorWithMsg(w, http.StatusBadRequest, "cannot parse id")
+		return
+	}
+	if !c.service.HasImage(id) {
+		writeHttpErrorWithMsg(w, http.StatusNotFound, "requested image not found")
+		return
+	}
+
+	w.Header().Set("Content-Type", c.service.GetImageMetadata(id).MimeType)
+	w.WriteHeader(http.StatusOK)
+	c.service.GetImage(id, w)
 }
 
 type GetImageListController struct {
 	service *ImageStorageService
 }
 
-func (h *GetImageListController) Serve(w http.ResponseWriter, r *http.Request) {
+func (c *GetImageListController) Serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		msg := "not a " + http.MethodGet + " request"
-		writeHttpError(w, http.StatusMethodNotAllowed, &msg)
+		writeHttpErrorWithMsg(w, http.StatusMethodNotAllowed, "not a "+http.MethodGet+" request")
 		return
 	}
 
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	images := c.service.GetListOfImages()
+	writeJsonResponse(w, http.StatusOK, ResponseImageList{Images: images})
 }

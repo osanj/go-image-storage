@@ -1,8 +1,18 @@
 package storage
 
+import (
+	"io"
+)
+
+type StorageItemMetadata struct {
+	Name     string
+	MimeType string
+}
+
 type Storage interface {
-	put(data []byte, name string) int
-	get(id int) []byte
-	getAllIds() []int
-	hasId(id int) bool
+	Put(reader io.Reader, metadata StorageItemMetadata) int
+	GetBytes(id int, writer io.Writer) bool
+	GetMetadata(id int) *StorageItemMetadata
+	GetAllIds() []int
+	HasId(id int) bool
 }

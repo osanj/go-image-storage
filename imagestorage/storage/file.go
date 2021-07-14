@@ -1,21 +1,25 @@
 package storage
 
+import (
+	"io"
+)
+
 type FileStorage struct {
 	basePath string
 }
 
-func (fs *FileStorage) put(data []byte, name string) int {
+func (fs *FileStorage) Put(reader io.Reader, name string) int {
 	return -1
 }
 
-func (fs *FileStorage) get(id int) []byte {
-	return []byte{0}
+func (fs *FileStorage) Get(id int, writer io.Writer) bool {
+	return true
 }
 
-func (fs *FileStorage) getAllIds() []int {
+func (fs *FileStorage) GetAllIds() []int {
 	return []int{-1}
 }
 
-func (fs *FileStorage) hasId(id int) bool {
-	return contains(fs.getAllIds(), id)
+func (fs *FileStorage) HasId(id int) bool {
+	return contains(fs.GetAllIds(), id)
 }

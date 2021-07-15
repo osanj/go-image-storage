@@ -1,6 +1,7 @@
 # go-image-storage
 
 Simple image storage service. Can be configured to store images on disk or in memory (for testing).
+User management and authentication is not implemented.
 
 Run with `go run main.go <configPath> <port>`, e.g. `go run main.go config/prod.json 8080`
 

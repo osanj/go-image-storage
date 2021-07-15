@@ -19,5 +19,5 @@ func main() {
 		panic("please provide a valid port")
 	}
 
-	imagestorage.BuildAndServe(configPath, port)
+	imagestorage.BuildAppAndServe(configPath, port)
 }

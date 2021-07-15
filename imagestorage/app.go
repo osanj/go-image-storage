@@ -9,11 +9,10 @@ import (
 	"github.com/osanj/go-image-storage/imagestorage/storage"
 )
 
-func BuildAndServe(configPath string, port int) {
+func BuildApp(configPath string) http.Handler {
 	configuration := readConfiguration(configPath)
 
 	var storageBackend storage.Storage
-	log.Printf("serving at localhost:%d", port)
 	log.Printf("using storage at %s", configuration.Storage.BasePath)
 	if configuration.Storage.BasePath == BasePathMemory {
 		storageBackend = storage.NewMemoryStorage()
@@ -31,5 +30,11 @@ func BuildAndServe(configPath string, port int) {
 	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/upload"), controllerPostImage.Serve)
 	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/item\\/[0-9]+"), controllerGetImage.Serve)
 	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/list"), controllerListImages.Serve)
-	log.Fatal(http.ListenAndServe(fmt.Sprint(":", port), &handler))
+	return &handler
+}
+
+func BuildAppAndServe(configPath string, port int) {
+	handler := BuildApp(configPath)
+	log.Printf("serving at localhost:%d", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprint(":", port), handler))
 }

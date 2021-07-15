@@ -3,12 +3,17 @@ package imagestorage
 import (
 	"io"
 	"log"
+	"strings"
 
 	"github.com/osanj/go-image-storage/imagestorage/storage"
 )
 
 type ImageStorageService struct {
 	storage storage.Storage
+}
+
+func (s *ImageStorageService) GetSupportedMimeTypes() []string {
+	return []string{"image/jpeg", "image/png"}
 }
 
 func (s *ImageStorageService) GetListOfImages() []ImageElement {
@@ -32,9 +37,11 @@ func (s *ImageStorageService) GetImageMetadata(id int) *storage.StorageItemMetad
 	return s.storage.GetMetadata(id)
 }
 
-func (s *ImageStorageService) PutImage(reader io.Reader, name string, mimeType string) int {
+func (s *ImageStorageService) PutImage(reader io.Reader, mimeType string) int {
+	ext := strings.Split(mimeType, "/")[1]
+	name := "image." + ext
 	metadata := storage.StorageItemMetadata{Name: name, MimeType: mimeType}
 	id := s.storage.Put(reader, metadata)
-	log.Printf("image was pushed id=%d name=%s", id, name)
+	log.Printf("an image was pushed (id=%d)", id)
 	return id
 }

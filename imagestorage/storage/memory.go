@@ -19,7 +19,7 @@ type MemoryStorage struct {
 }
 
 func NewMemoryStorage() *MemoryStorage {
-	return &MemoryStorage{data: map[int]*MemoryStorageElement{}, nextId: 0, mutex: sync.Mutex{}}
+	return &MemoryStorage{data: map[int]*MemoryStorageElement{}, nextId: 1, mutex: sync.Mutex{}}
 }
 
 func (ms *MemoryStorage) Put(reader io.Reader, metadata StorageItemMetadata) int {

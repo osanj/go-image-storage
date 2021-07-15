@@ -15,7 +15,8 @@ func BuildAndServe(port int) {
 	// create controllers
 	// assign controllers
 
-	storageBackend := storage.NewMemoryStorage()
+	// storageBackend := storage.NewMemoryStorage()
+	storageBackend := storage.NewFileStorage("/home/jonas/code/personal/go-image-storage/test")
 	service := ImageStorageService{storage: storageBackend}
 
 	controllerPostImage := PostImageController{service: &service}

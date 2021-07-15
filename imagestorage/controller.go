@@ -61,7 +61,7 @@ func (c *PostImageController) Serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allowedMimeTypes := []string{"image/jpg", "image/jpeg", "image/png"}
+	allowedMimeTypes := c.service.GetSupportedMimeTypes()
 	mimeTypeNone := ""
 	mimeType := mimeTypeNone
 
@@ -82,7 +82,7 @@ func (c *PostImageController) Serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := c.service.PutImage(r.Body, "abc", mimeType)
+	id := c.service.PutImage(r.Body, mimeType)
 	status := http.StatusOK
 	if status < 0 {
 		status = http.StatusInternalServerError

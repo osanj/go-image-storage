@@ -13,6 +13,7 @@ func BuildAndServe(configPath string, port int) {
 	configuration := readConfiguration(configPath)
 
 	var storageBackend storage.Storage
+	log.Printf("serving at localhost:%d", port)
 	log.Printf("using storage at %s", configuration.Storage.BasePath)
 	if configuration.Storage.BasePath == BasePathMemory {
 		storageBackend = storage.NewMemoryStorage()
@@ -27,8 +28,8 @@ func BuildAndServe(configPath string, port int) {
 	controllerListImages := GetImageListController{service: &service}
 
 	handler := RegexpHandler{}
-	handler.HandleFunc(regexp.MustCompile("\\/upload"), controllerPostImage.Serve)
-	handler.HandleFunc(regexp.MustCompile("\\/item\\/[0-9]+"), controllerGetImage.Serve)
-	handler.HandleFunc(regexp.MustCompile("\\/list"), controllerListImages.Serve)
+	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/upload"), controllerPostImage.Serve)
+	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/item\\/[0-9]+"), controllerGetImage.Serve)
+	handler.HandleFunc(regexp.MustCompile("\\/api\\/v1\\/list"), controllerListImages.Serve)
 	log.Fatal(http.ListenAndServe(fmt.Sprint(":", port), &handler))
 }

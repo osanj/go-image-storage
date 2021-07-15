@@ -88,7 +88,7 @@ func NewFileStorage(basePath string, createIfNotExists bool) *FileStorage {
 		items[dirId] = &StorageItemMetadata{Name: f2Name, MimeType: mimeType}
 	}
 
-	log.Printf("found %d images in %s", len(items), basePath)
+	log.Printf("found %d images", len(items))
 	return &FileStorage{basePath: basePath, data: items, nextId: maxId + 1, mutex: sync.Mutex{}}
 }
 

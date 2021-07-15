@@ -12,15 +12,23 @@ import (
 )
 
 type FileStorage struct {
-	basePath string
-	data     map[int]*StorageItemMetadata
-	nextId   int
-	mutex    sync.Mutex
+	basePath          string
+	createIfNotExists bool
+	data              map[int]*StorageItemMetadata
+	nextId            int
+	mutex             sync.Mutex
 }
 
-func NewFileStorage(basePath string) *FileStorage {
+func NewFileStorage(basePath string, createIfNotExists bool) *FileStorage {
 	items := map[int]*StorageItemMetadata{}
 	maxId := 0
+
+	if createIfNotExists {
+		err := os.MkdirAll(basePath, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
@@ -90,7 +98,6 @@ func (fs *FileStorage) Put(reader io.Reader, metadata StorageItemMetadata) int {
 	fs.nextId++
 	fs.mutex.Unlock()
 
-	log.Printf("basePath %s", fs.basePath)
 	pathDir := filepath.Join(fs.basePath, strconv.Itoa(id))
 	path := filepath.Join(pathDir, metadata.Name)
 

@@ -1,0 +1,6 @@
+{
+    "Storage": {
+        "BasePath": "/tmp/imagestorage",
+        "CreateIfNotExists": true
+    }
+}

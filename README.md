@@ -1,10 +1,10 @@
 # go-image-storage
 
-`go build -o bin/`
+`go run main.go config/prod.json`
 
 `go test -v`
 
-`curl -X POST -H "Content-Type: image/jpeg" --data-binary @beaver.jpg localhost:8080/upload`
+`curl -X POST -H "Content-Type: image/jpeg" --data-binary @testdata/beaver1.jpg localhost:8080/upload`
 
 `curl localhost:8080/item/0 -o /dev/null -i`
 

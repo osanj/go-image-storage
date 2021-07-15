@@ -1,0 +1,6 @@
+{
+    "Storage": {
+        "BasePath": ":memory:",
+        "CreateIfNotExists": true
+    }
+}

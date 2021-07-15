@@ -1,24 +1,29 @@
 package imagestorage
 
-// import (
-//     "encoding/json"
-//     "os"
-//     "fmt"
-// )
+import (
+	"encoding/json"
+	"os"
+)
 
-// type Configuration struct {
-//     Users    []string
-//     Groups   []string
-// }
+const BasePathMemory = ":memory:"
 
-// file, _ := os.Open("conf.json")
-// defer file.Close()
-// decoder := json.NewDecoder(file)
-// configuration := Configuration{}
-// err := decoder.Decode(&configuration)
-// if err != nil {
-//   fmt.Println("error:", err)
-// }
-// fmt.Println(configuration.Users) // output: [UserA, UserB]
+type StorageConfiguration struct {
+	BasePath          string
+	CreateIfNotExists bool
+}
 
-// https://stackoverflow.com/questions/16465705/how-to-handle-configuration-in-go
+type Configuration struct {
+	Storage StorageConfiguration
+}
+
+func readConfiguration(path string) Configuration {
+	file, _ := os.Open(path)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	configuration := Configuration{}
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		panic(err)
+	}
+	return configuration
+}

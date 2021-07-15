@@ -9,14 +9,17 @@ import (
 	"github.com/osanj/go-image-storage/imagestorage/storage"
 )
 
-func BuildAndServe(port int) {
-	// read config
-	// create service
-	// create controllers
-	// assign controllers
+func BuildAndServe(configPath string, port int) {
+	configuration := readConfiguration(configPath)
 
-	// storageBackend := storage.NewMemoryStorage()
-	storageBackend := storage.NewFileStorage("/home/jonas/code/personal/go-image-storage/test")
+	var storageBackend storage.Storage
+	log.Printf("using storage at %s", configuration.Storage.BasePath)
+	if configuration.Storage.BasePath == BasePathMemory {
+		storageBackend = storage.NewMemoryStorage()
+	} else {
+		storageBackend = storage.NewFileStorage(configuration.Storage.BasePath, configuration.Storage.CreateIfNotExists)
+	}
+
 	service := ImageStorageService{storage: storageBackend}
 
 	controllerPostImage := PostImageController{service: &service}
